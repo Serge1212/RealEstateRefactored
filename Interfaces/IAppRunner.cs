@@ -5,6 +5,6 @@
     /// </summary>
     public interface IAppRunner
     {
-        void Run();
+        void StartApp();
     }
 }
