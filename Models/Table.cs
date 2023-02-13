@@ -1,7 +1,8 @@
 ﻿namespace RealEstateRefactored.Models {
-     /// <summary>
-     /// The model that represents the table in the database.
-     /// </summary>
+    /// <summary>
+    /// The model that represents the table in the database.
+    /// </summary>
+    [Serializable]
     public class Table {
         public string Name { get; set; }
 

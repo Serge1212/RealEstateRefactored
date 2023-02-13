@@ -4,6 +4,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace RealEstateRefactored.Infrastructure
 {
+    [Serializable]
     public class DbConnection : IDbConnection
     {
         private readonly IDbContext _context;
