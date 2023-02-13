@@ -1,15 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using RealEstateRefactored.Infrastructure;
 using RealEstateRefactored.Interfaces;
-using RealEstateRefactored.Services;
 
-namespace RealEstateRefactored {
-  public class Startup {
+namespace RealEstateRefactored
+{
+    public class Startup {
         static void Main(string[] args)
         {
             ConfigureServices();
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(AppRunner.CurrentDomain_ProcessExit);
         }
 
         private static void ConfigureServices()
@@ -18,6 +18,8 @@ namespace RealEstateRefactored {
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddLogging(config => config.AddConsole());
+                    services.AddSingleton<IDbContext, DbContext>();
+                    services.AddSingleton<IDbConnection, DbConnection>();
                     services.AddScoped<AppRunner>();
                 });
 

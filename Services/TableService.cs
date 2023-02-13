@@ -59,8 +59,35 @@ namespace RealEstateRefactored.Services
             PopulateRowsWithNewColumn(table, newColumn.Type);
         }
 
-        void RenameColumn(string tableName, string oldColumnName, string newColumnName)
+        /// <inheritdoc/>
+        public void RenameColumn(string tableName, string oldColumnName, string newColumnName)
         {
+            _dbContext
+                .Tables
+                .SingleOrDefault(t => t.Name == tableName)
+                .Columns
+                .SingleOrDefault(c => c.Name == oldColumnName)
+                .Name = newColumnName;
+        }
+
+        /// <inheritdoc/>
+        public void DeleteColumn(string tableName, string columnName)
+        {
+            var table = GetTable(tableName);
+            var column = GetColumn(columnName, table);
+            _dbContext
+                 .Tables
+                 .SingleOrDefault(t => t.Name == tableName)
+                 .Columns
+                 .Remove(column);
+        }
+
+        /// <inheritdoc/>
+        void AddRow(string tableName, List<string> columnsNames, List<string> values)
+        {
+            var table = GetTable(tableName);
+            var maxRowIndex = ++table.MaxRowIndex;
+
 
         }
 
@@ -87,10 +114,14 @@ namespace RealEstateRefactored.Services
             };
         }
 
-        private Column GetColumn(Table table, int index)
+        private Column GetColumn(int index, Table table)
         {
-            var targetTable = _dbContext.Tables.SingleOrDefault(t => t == table);
-            return targetTable.Columns.SingleOrDefault(c => c.Index == index);
+            return table.Columns.SingleOrDefault(c => c.Index == index);
+        }
+
+        private Column GetColumn(string columnName, Table table)
+        {
+            return table.Columns.SingleOrDefault(c => c.Name == columnName);
         }
 
         private Table GetTable(string tableName)
@@ -101,6 +132,56 @@ namespace RealEstateRefactored.Services
         private void SaveChanges(Table table)
         {
 
+        }
+
+        void ITableService.AddRow(string tableName, List<string> columnsNames, List<string> values)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRow(Row row)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CheckRowCondition(Row row, string conditionColumnName, string columnCondition, string conditionValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CheckRowCondition(Row row1, string conditionColumnName, string columnCondition, Row row2)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteRows(string SingleColumnName, string SingleValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetValueWithCondition(string columnName, string columnValue, string conditionColumnName, string columnCondition, string conditionValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<string> GetColumnNames()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Row GetRow(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SwapRows(Row row1, Row row2)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearAllRows()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -35,8 +35,20 @@ namespace RealEstateRefactored.Interfaces
         /// <param name="oldColumnName">The column name to be renamed to.</param>
         /// <param name="newColumnName">New column name.</param>
         void RenameColumn(string tableName, string oldColumnName, string newColumnName);
-        void DeleteColumn(string columnName);
-        void AddRow(List<string> columnsNames, List<string> values);
+
+        /// <summary>
+        /// Deletes the existing column from the existing table.
+        /// </summary>
+        /// <param name="tableName">The name of the table where the column will removed.</param>
+        /// <param name="columnName">The name of column to be removed.</param>
+        void DeleteColumn(string tableName, string columnName);
+        
+        /// <summary>
+        /// Adds new rows to the existing table.
+        /// </summary>
+        /// <param name="columnsNames">The target columns that INSERT statement involved.</param>
+        /// <param name="values">The values of the columns.</param>
+        void AddRow(string tableName, List<string> columnsNames, List<string> values);
         void DeleteRow(Row row);
         bool CheckRowCondition(Row row, string conditionColumnName, string columnCondition, string conditionValue);
         bool CheckRowCondition(Row row1, string conditionColumnName, string columnCondition, Row row2);

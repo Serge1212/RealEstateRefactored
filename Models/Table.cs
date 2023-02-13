@@ -7,7 +7,7 @@
 
         public int MaxColumnIndex { get; set; }
 
-        public int MaxRowIndex { get; private set; }
+        public int MaxRowIndex { get; set; }
         
         public List<Column> Columns { get; set; }
         
