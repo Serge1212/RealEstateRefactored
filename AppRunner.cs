@@ -1,6 +1,4 @@
 ﻿using RealEstateRefactored.Interfaces;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace RealEstateRefactored
 {
@@ -9,12 +7,6 @@ namespace RealEstateRefactored
         public void StartApp()
         {
             Console.WriteLine("Hello");
-            string command;
-            while ((command = Console.ReadLine()) != null)
-            {
-                if (command.ToLowerInvariant() == "exit")
-                    break;
-            }
         }
     }
 }

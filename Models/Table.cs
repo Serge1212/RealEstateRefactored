@@ -3,12 +3,14 @@
      /// The model that represents the table in the database.
      /// </summary>
     public class Table {
-        public string Name { get; private set; }
-        public int MaxColumnIndex { get; private set; }
+        public string Name { get; set; }
+
+        public int MaxColumnIndex { get; set; }
+
         public int MaxRowIndex { get; private set; }
         
-        private List<Column> _columns;
+        public List<Column> Columns { get; set; }
         
-        private List<Row> _rows;
+        public List<Row> Rows { get; set; }
     }
 }

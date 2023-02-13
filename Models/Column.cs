@@ -16,18 +16,11 @@ namespace RealEstateRefactored.Models
         /// <summary>
         /// The type of the column.
         /// </summary>
-        public DataTypes Type { get; set; }
+        public DataType Type { get; set; }
 
         /// <summary>
         /// The index of the column.
         /// </summary>
-        public int Index { get; }
-
-        public Column(string name, string type, int index)
-        {
-            Name = name;
-            Type = (DataTypes)Enum.Parse(typeof(DataTypes), type); //TODO: add validation to the more top level
-            Index = index;
-        }
+        public int Index { get; set; }
     }
 }

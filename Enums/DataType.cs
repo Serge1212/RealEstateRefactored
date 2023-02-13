@@ -3,7 +3,7 @@
     /// <summary>
     /// The available data types for the database columns.
     /// </summary>
-    public enum DataTypes
+    public enum DataType
     {
         Int,
         Text,
