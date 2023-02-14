@@ -20,18 +20,19 @@ namespace RealEstateRefactored
             var builder = new HostBuilder()
                 .ConfigureServices((hostContext, services) =>
                 {
+                    // Infrastructure.
                     services.AddLogging(config => config.AddConsole());
                     services.AddSingleton<IDbContext, DbContext>();
                     services.AddSingleton<IDbConnection, DbConnection>();
+                    services.AddSingleton<AppRunner>();
 
-                    //Services
+                    // Services.
                     services.AddScoped<ITableService, TableService>();
 
                     // Strategies.
                     services.AddScoped<ICommandContext, CommandContext>();
                     services.AddScoped<IShowTablesStrategy, ShowTablesStrategy>();
                     services.AddScoped<ICreateTableStrategy, CreateTableStrategy>();
-                    services.AddScoped<AppRunner>();
                 });
 
             var host = builder.Build();
