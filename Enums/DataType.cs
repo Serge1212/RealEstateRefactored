@@ -1,7 +1,7 @@
 ﻿namespace RealEstateRefactored.Enums
 {
     /// <summary>
-    /// The available data types for the database columns.
+    /// All available data types for the database columns.
     /// </summary>
     public enum DataType
     {

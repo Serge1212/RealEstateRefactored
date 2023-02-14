@@ -7,6 +7,7 @@ using RealEstateRefactored.Interfaces.Strategies.Base;
 
 namespace RealEstateRefactored.Infrastructure
 {
+    /// <inheritdoc/>
     public class CommandContext : ICommandContext
     {
         private readonly List<Command> _commands;
@@ -17,10 +18,7 @@ namespace RealEstateRefactored.Infrastructure
             _services = services;
         }
 
-        /// <summary>
-        /// Splits raw command into multiple commands.
-        /// </summary>
-        /// <param name="rawCommand">May have either one command or multiple ones.</param>
+        /// <inheritdoc/>
         public void ProcessCommands(string rawCommand)
         {
             // Split raw command into multiple commands.
@@ -46,11 +44,6 @@ namespace RealEstateRefactored.Infrastructure
 
         }
 
-        /// <summary>
-        /// Identifies the raw command that was passed from UI.
-        /// </summary>
-        /// <param name="command">The raw command passed from UI.</param>
-        /// <returns>The command model.</returns>
         private Command IdentifyCommand(string rawCommand)
         {
             var command = new Command();

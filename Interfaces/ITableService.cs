@@ -49,16 +49,6 @@ namespace RealEstateRefactored.Interfaces
         /// <param name="columnsNames">The target columns that INSERT statement involved.</param>
         /// <param name="values">The values of the columns.</param>
         void AddRow(string tableName, List<string> columnsNames, List<string> values);
-        void DeleteRow(Row row);
-        bool CheckRowCondition(Row row, string conditionColumnName, string columnCondition, string conditionValue);
-        bool CheckRowCondition(Row row1, string conditionColumnName, string columnCondition, Row row2);
-        void DeleteRows(string SingleColumnName, string SingleValue);
-        void SetValueWithCondition(string columnName, string columnValue, string conditionColumnName, string columnCondition, string conditionValue);
-        //UniversalRecord GetRecord(string columnName, int rowIndex);
-        List<string> GetColumnNames();
-        Row GetRow(int index);
-        void SwapRows(Row row1, Row row2);
-        void ClearAllRows();
 
         /// <summary>
         /// Create a brand new table in the database.

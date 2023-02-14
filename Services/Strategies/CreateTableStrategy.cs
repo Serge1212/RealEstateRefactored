@@ -4,6 +4,7 @@ using RealEstateRefactored.Models;
 
 namespace RealEstateRefactored.Services.Strategies
 {
+    /// <inheritdoc/>
     public class CreateTableStrategy : ICreateTableStrategy
     {
         private readonly ITableService _tableService;

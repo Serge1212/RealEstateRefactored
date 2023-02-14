@@ -1,5 +1,8 @@
 ﻿namespace RealEstateRefactored.Interfaces
 {
+    /// <summary>
+    /// Establishes the connection to the file where the database is stored.
+    /// </summary>
     public interface IDbConnection
     {
         /// <summary>

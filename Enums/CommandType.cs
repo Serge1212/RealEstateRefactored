@@ -1,5 +1,8 @@
 ﻿namespace RealEstateRefactored.Enums
 {
+    /// <summary>
+    /// All available commands types.
+    /// </summary>
     public enum CommandType
     {
         UNKNOWN,

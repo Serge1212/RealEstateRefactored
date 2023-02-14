@@ -2,8 +2,14 @@
 
 namespace RealEstateRefactored.Interfaces
 {
+    /// <summary>
+    /// The context that holds the state of the database.
+    /// </summary>
     public interface IDbContext
     {
-        List<Table> Tables { get; set; }
+        /// <summary>
+        /// The state of the database tables.
+        /// </summary>
+        public List<Table> Tables { get; set; }
     }
 }

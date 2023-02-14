@@ -6,9 +6,9 @@
     public interface ICommandContext
     {
         /// <summary>
-        /// Processes the command/s sent by user input.
+        /// Splits raw command into multiple commands.
         /// </summary>
-        /// <param name="rawCommand">The actual input that a user sent.</param>
+        /// <param name="rawCommand">May have either one command or multiple ones.</param>
         void ProcessCommands(string rawCommand);
     }
 }

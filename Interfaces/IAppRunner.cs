@@ -5,6 +5,9 @@
     /// </summary>
     public interface IAppRunner
     {
+        /// <summary>
+        /// Entry point of the application.
+        /// </summary>
         void StartApp();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace RealEstateRefactored
 {
+    /// <inheritdoc/>
     public class AppRunner : IAppRunner
     {
         private readonly IDbConnection _connection;
@@ -13,15 +14,14 @@ namespace RealEstateRefactored
             _commandContext = commandContext;
         }
 
-        /// <summary>
-        /// Entry point of the application.
-        /// </summary>
+        /// <inheritdoc/>
         public void StartApp()
         {
             Console.OutputEncoding = System.Text.Encoding.Unicode; //for cyrillic
             Console.InputEncoding = System.Text.Encoding.Unicode; //for cyrillic
 
             _connection.Load();
+
             Console.WriteLine("Welcome to the Real Estate application!");
             Console.WriteLine("The database currently contains the following tables:");
             _commandContext.ProcessCommands("SHOW TABLES");
