@@ -59,5 +59,13 @@ namespace RealEstateRefactored.Interfaces
         Row GetRow(int index);
         void SwapRows(Row row1, Row row2);
         void ClearAllRows();
+
+        /// <summary>
+        /// Create a brand new table in the database.
+        /// </summary>
+        /// <param name="tableName">The name of new table.</param>
+        /// <param name="columnNames">The names of columns for the new table.</param>
+        /// <param name="columnTypes">The type of columns for the new table.</param>
+        void CreateTable(string tableName, List<string> columnNames, List<string> columnTypes);
     }
 }

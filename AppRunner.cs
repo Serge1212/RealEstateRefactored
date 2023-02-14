@@ -5,22 +5,44 @@ namespace RealEstateRefactored
     public class AppRunner : IAppRunner
     {
         private readonly IDbConnection _connection;
-        private readonly IDbContext _context;
-        //private readonly ICommandContext _commandContext;
+        private readonly ICommandContext _commandContext;
 
-        public AppRunner(IDbConnection connection, IDbContext context/*, ICommandContext commandContext*/)
+        public AppRunner(IDbConnection connection, ICommandContext commandContext)
         {
             _connection = connection;
-            //_commandContext = commandContext;
-            _context = context;
+            _commandContext = commandContext;
         }
 
+        /// <summary>
+        /// Entry point of the application.
+        /// </summary>
         public void StartApp()
         {
+            Console.OutputEncoding = System.Text.Encoding.Unicode; //for cyrillic
+            Console.InputEncoding = System.Text.Encoding.Unicode; //for cyrillic
+
             _connection.Load();
+            Console.WriteLine("Welcome to the Real Estate application!");
+            Console.WriteLine("The database currently contains the following tables:");
+            _commandContext.ProcessCommands("SHOW TABLES");
+            Console.WriteLine("Enter the desired command/s (SQL syntax):");
+
+            StartReceiving();
+
             _connection.Save();
-            Console.WriteLine("Hello");
-            Console.ReadLine();
+        }
+
+        private void StartReceiving()
+        {
+            string rawCommand;
+            while ((rawCommand = Console.ReadLine()) is not null)
+            {
+                if(rawCommand.ToLowerInvariant() is "exit")
+                {
+                    break;
+                }
+                _commandContext.ProcessCommands(rawCommand);
+            }
         }
     }
 }

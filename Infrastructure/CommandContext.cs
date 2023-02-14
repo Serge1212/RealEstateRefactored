@@ -9,7 +9,7 @@ namespace RealEstateRefactored.Infrastructure
 {
     public class CommandContext : ICommandContext
     {
-        private readonly Command _command;
+        private readonly List<Command> _commands;
         private readonly IServiceProvider _services;
 
         public CommandContext(IServiceProvider services)
@@ -17,9 +17,43 @@ namespace RealEstateRefactored.Infrastructure
             _services = services;
         }
 
-        public Command IdentifyCommand(string rawCommand)
+        /// <summary>
+        /// Splits raw command into multiple commands.
+        /// </summary>
+        /// <param name="rawCommand">May have either one command or multiple ones.</param>
+        public void ProcessCommands(string rawCommand)
         {
-            var _command = new Command();
+            // Split raw command into multiple commands.
+            string[] subCommands = rawCommand.Split(";", StringSplitOptions.RemoveEmptyEntries);
+
+            // Format multiple commands.
+            for (int i = 0; i < subCommands.Length; i++)
+            {
+                subCommands[i] = subCommands[i].Replace(Environment.NewLine, "").Trim();
+            }
+
+            //Process each.
+            foreach(string subCommand in subCommands)
+            {
+                var command = IdentifyCommand(subCommand);
+                if (command.Type is CommandType.UNKNOWN)
+                {
+                    Console.WriteLine();
+                }
+
+                SetStrategy(command);
+            }
+
+        }
+
+        /// <summary>
+        /// Identifies the raw command that was passed from UI.
+        /// </summary>
+        /// <param name="command">The raw command passed from UI.</param>
+        /// <returns>The command model.</returns>
+        private Command IdentifyCommand(string rawCommand)
+        {
+            var command = new Command();
 
             if (rawCommand == null)
             {
@@ -28,92 +62,92 @@ namespace RealEstateRefactored.Infrastructure
            
             if (rawCommand == "SHOW TABLES")
             {
-                _command.Type = CommandType.SHOW_TABLES;
+                command.Type = CommandType.SHOW_TABLES;
             }
             else if (new Regex(@"^CREATE TABLE [a-zA-Z0-9_-]+ \(([a-zA-Z0-9_-]+ [a-zA-Z]+,? ?)*\)$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.CREATE_TABLE;
+                command.Type = CommandType.CREATE_TABLE;
                 Regex regex = new Regex(@"^CREATE TABLE ([a-zA-Z0-9_-]+) ?\((?:([a-zA-Z0-9_-]+) ([a-zA-Z]+),? ?)*\)$");
                 Match match = regex.Match(rawCommand);
-                _command.TableName = match.Groups[1].Value;
-                _command.ColumnNames = new List<string>();
-                _command.ColumnNames.AddRange(match.Groups[2].Captures.Select(x => x.Value));
-                _command.ColumnTypes = new List<string>();
-                _command.ColumnTypes.AddRange(match.Groups[3].Captures.Select(x => x.Value));
+                command.TableName = match.Groups[1].Value;
+                command.ColumnNames = new List<string>();
+                command.ColumnNames.AddRange(match.Groups[2].Captures.Select(x => x.Value));
+                command.ColumnTypes = new List<string>();
+                command.ColumnTypes.AddRange(match.Groups[3].Captures.Select(x => x.Value));
             }
             else if (new Regex(@"^INSERT INTO [a-zA-Z0-9_-]+ ?(\(([a-zA-Z0-9_-]+,? ?)*\))? VALUES ?\(('[^']+',? ?)*\)$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.INSERT_INTO;
+                command.Type = CommandType.INSERT_INTO;
                 Regex regex = new Regex(@"^INSERT INTO ([a-zA-Z0-9_-]+) ?(?:\((?:([a-zA-Z0-9_-]+),? ?)*\))? VALUES ?\((?:'([^']+)',? ?)*\)$");
                 Match match = regex.Match(rawCommand);
-                _command.TableName = match.Groups[1].Value;
-                _command.ColumnNames = new List<string>();
-                _command.ColumnNames.AddRange(match.Groups[2].Captures.Select(x => x.Value));
-                _command.ColumnValues = new List<string>();
-                _command.ColumnValues.AddRange(match.Groups[3].Captures.Select(x => x.Value));
+                command.TableName = match.Groups[1].Value;
+                command.ColumnNames = new List<string>();
+                command.ColumnNames.AddRange(match.Groups[2].Captures.Select(x => x.Value));
+                command.ColumnValues = new List<string>();
+                command.ColumnValues.AddRange(match.Groups[3].Captures.Select(x => x.Value));
             }
             else if (new Regex(@"^DELETE FROM ([a-zA-Z0-9_-]+)( WHERE ([a-zA-Z0-9_-]+) = '([^']+)')?$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.DELETE_FROM;
+                command.Type = CommandType.DELETE_FROM;
                 Regex regex = new Regex(@"^DELETE FROM ([a-zA-Z0-9_-]+)(?: WHERE ([a-zA-Z0-9_-]+) = '([^']+)')?$");
                 Match match = regex.Match(rawCommand);
-                _command.TableName = match.Groups[1].Value;
-                _command.SingleColumnName = match.Groups[2].Value;
-                _command.SingleValue = match.Groups[3].Value;
+                command.TableName = match.Groups[1].Value;
+                command.SingleColumnName = match.Groups[2].Value;
+                command.SingleValue = match.Groups[3].Value;
             }
             else if (new Regex(@"^DROP TABLE [a-zA-Z0-9_-]+$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.DROP_TABLE;
-                _command.TableName = rawCommand.Substring(10).Trim();
+                command.Type = CommandType.DROP_TABLE;
+                command.TableName = rawCommand.Substring(10).Trim();
             }
             else if (new Regex(@"^ALTER TABLE [a-zA-Z0-9_-]+ RENAME TO [a-zA-Z0-9_-]+$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.ALTER_TABLE_RENAME_TO;
+                command.Type = CommandType.ALTER_TABLE_RENAME_TO;
                 Regex regex = new Regex(@"^ALTER TABLE ([a-zA-Z0-9_-]+) RENAME TO ([a-zA-Z0-9_-]+)$");
                 Match match = regex.Match(rawCommand);
-                _command.TableName = match.Groups[1].Value;
-                _command.TableNameNew = match.Groups[2].Value;
+                command.TableName = match.Groups[1].Value;
+                command.TableNameNew = match.Groups[2].Value;
             }
             else if (new Regex(@"^ALTER TABLE [a-zA-Z0-9_-]+ RENAME COLUMN [a-zA-Z0-9_-]+ TO [a-zA-Z0-9_-]+$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.ALTER_TABLE_RENAME_COLUMN;
+                command.Type = CommandType.ALTER_TABLE_RENAME_COLUMN;
                 Regex regex = new Regex(@"^ALTER TABLE ([a-zA-Z0-9_-]+) RENAME COLUMN ([a-zA-Z0-9_-]+) TO ([a-zA-Z0-9_-]+)$");
                 Match match = regex.Match(rawCommand);
-                _command.TableName = match.Groups[1].Value;
-                _command.SingleColumnName = match.Groups[2].Value;
-                _command.SingleColumnNameNew = match.Groups[3].Value;
+                command.TableName = match.Groups[1].Value;
+                command.SingleColumnName = match.Groups[2].Value;
+                command.SingleColumnNameNew = match.Groups[3].Value;
             }
             else if (new Regex(@"^ALTER TABLE [a-zA-Z0-9_-]+ DELETE COLUMN [a-zA-Z0-9_-]+$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.ALTER_TABLE_DELETE_COLUMN;
+                command.Type = CommandType.ALTER_TABLE_DELETE_COLUMN;
                 Regex regex = new Regex(@"^ALTER TABLE ([a-zA-Z0-9_-]+) DELETE COLUMN ([a-zA-Z0-9_-]+)$");
                 Match match = regex.Match(rawCommand);
-                _command.TableName = match.Groups[1].Value;
-                _command.SingleColumnName = match.Groups[2].Value;
+                command.TableName = match.Groups[1].Value;
+                command.SingleColumnName = match.Groups[2].Value;
             }
             else if (new Regex(@"^ALTER TABLE [a-zA-Z0-9_-]+ ADD COLUMN [a-zA-Z0-9_-]+ [a-zA-Z]+$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.ALTER_TABLE_ADD_COLUMN;
+                command.Type = CommandType.ALTER_TABLE_ADD_COLUMN;
                 Regex regex = new(@"^ALTER TABLE ([a-zA-Z0-9_-]+) ADD COLUMN ([a-zA-Z0-9_-]+) ([a-zA-Z]+)$");
                 Match match = regex.Match(rawCommand);
-                _command.TableName = match.Groups[1].Value;
-                _command.ColumnNames = new List<string>();
-                _command.ColumnNames.Add(match.Groups[2].Value);
-                _command.ColumnTypes = new List<string>();
-                _command.ColumnTypes.Add(match.Groups[3].Value);
+                command.TableName = match.Groups[1].Value;
+                command.ColumnNames = new List<string>();
+                command.ColumnNames.Add(match.Groups[2].Value);
+                command.ColumnTypes = new List<string>();
+                command.ColumnTypes.Add(match.Groups[3].Value);
             }
             else if (new Regex(@"^UPDATE [a-zA-Z0-9_-]+ SET ([a-zA-Z0-9_-]+ ?= ?'[^']+',? ?)+ WHERE [a-zA-Z0-9_-]+ ?= ?'[^']+'$").IsMatch(rawCommand))
             {
-                _command.Type = CommandType.UPDATE;
+                command.Type = CommandType.UPDATE;
                 Regex regex = new Regex(@"^UPDATE ([a-zA-Z0-9_-]+) SET (?:([a-zA-Z0-9_-]+) ?= ?'([^']+)',? ?)+ WHERE ([a-zA-Z0-9_-]+) = '([^']+)'$");
                 Match match = regex.Match(rawCommand);
-                _command.TableName = match.Groups[1].Value;
-                _command.ColumnNames = new List<string>();
-                _command.ColumnNames.AddRange(match.Groups[2].Captures.Select(x => x.Value));
-                _command.ColumnValues = new List<string>();
-                _command.ColumnValues.AddRange(match.Groups[3].Captures.Select(x => x.Value));
-                _command.SingleColumnName = match.Groups[4].Value;
-                _command.SingleValue = match.Groups[5].Value;
+                command.TableName = match.Groups[1].Value;
+                command.ColumnNames = new List<string>();
+                command.ColumnNames.AddRange(match.Groups[2].Captures.Select(x => x.Value));
+                command.ColumnValues = new List<string>();
+                command.ColumnValues.AddRange(match.Groups[3].Captures.Select(x => x.Value));
+                command.SingleColumnName = match.Groups[4].Value;
+                command.SingleValue = match.Groups[5].Value;
             }
             else if (rawCommand.StartsWith("SELECT "))
             {
@@ -168,55 +202,57 @@ namespace RealEstateRefactored.Infrastructure
                 #region match parts
                 if (regexSelect.IsMatch(commandPartSelect))
                 {
-                    _command.Type = CommandType.SELECT;
+                    command.Type = CommandType.SELECT;
                     Match match = regexSelect.Match(commandPartSelect);
-                    _command.ColumnNames = new List<string>();
-                    _command.ColumnNames.AddRange(match.Groups[1].Captures.Select(x => x.Value));
-                    _command.ColumnValues = new List<string>();
-                    _command.ColumnValues.AddRange(match.Groups[2].Captures.Select(x => x.Value));
-                    _command.TableName = match.Groups[3].Value;
+                    command.ColumnNames = new List<string>();
+                    command.ColumnNames.AddRange(match.Groups[1].Captures.Select(x => x.Value));
+                    command.ColumnValues = new List<string>();
+                    command.ColumnValues.AddRange(match.Groups[2].Captures.Select(x => x.Value));
+                    command.TableName = match.Groups[3].Value;
                 }
 
                 if (regexJoin.IsMatch(commandPartJoin))
                 {
                     Match match = regexJoin.Match(commandPartJoin);
-                    _command.TableNameJoin = match.Groups[1].Value;
-                    _command.SingleColumnName = match.Groups[2].Value;
-                    _command.SingleColumnNameJoin = match.Groups[3].Value;
+                    command.TableNameJoin = match.Groups[1].Value;
+                    command.SingleColumnName = match.Groups[2].Value;
+                    command.SingleColumnNameJoin = match.Groups[3].Value;
                 }
 
                 if (regexWhere.IsMatch(commandPartWhere))
                 {
                     Match match = regexWhere.Match(commandPartWhere);
-                    _command.ColumnNamesWhere = new List<string>();
-                    _command.ColumnNamesWhere.AddRange(match.Groups[1].Captures.Select(x => x.Value));
-                    _command.ColumnConditionWhere = new List<string>();
-                    _command.ColumnConditionWhere.AddRange(match.Groups[2].Captures.Select(x => x.Value));
-                    _command.ColumnValuesWhere = new List<string>();
-                    _command.ColumnValuesWhere.AddRange(match.Groups[3].Captures.Select(x => x.Value));
+                    command.ColumnNamesWhere = new List<string>();
+                    command.ColumnNamesWhere.AddRange(match.Groups[1].Captures.Select(x => x.Value));
+                    command.ColumnConditionWhere = new List<string>();
+                    command.ColumnConditionWhere.AddRange(match.Groups[2].Captures.Select(x => x.Value));
+                    command.ColumnValuesWhere = new List<string>();
+                    command.ColumnValuesWhere.AddRange(match.Groups[3].Captures.Select(x => x.Value));
                 }
                 if (regexOrderBy.IsMatch(commandPartOrderBy))
                 {
                     Match match = regexOrderBy.Match(commandPartOrderBy);
-                    _command.ColumnNamesOrderBy = new List<string>();
-                    _command.ColumnNamesOrderBy.AddRange(match.Groups[1].Captures.Select(x => x.Value));
-                    _command.OrderByTypes = new List<string>();
-                    _command.OrderByTypes.AddRange(match.Groups[2].Captures.Select(x => x.Value));
+                    command.ColumnNamesOrderBy = new List<string>();
+                    command.ColumnNamesOrderBy.AddRange(match.Groups[1].Captures.Select(x => x.Value));
+                    command.OrderByTypes = new List<string>();
+                    command.OrderByTypes.AddRange(match.Groups[2].Captures.Select(x => x.Value));
                 }
                 #endregion
             }
 
-            return _command;
+            return command;
         }
 
-        private void SetStrategy()
+        private void SetStrategy(Command command)
         {
+            var strategy = ResolveStrategy(command);
+            strategy.Invoke(command);
 
         }
 
-        private ICommandStrategy ResolveStrategy()
+        private ICommandStrategy ResolveStrategy(Command command)
         {
-            return _command.Type switch
+            return command.Type switch
             {
                 CommandType.SHOW_TABLES => (ICommandStrategy)_services.GetService(typeof(IShowTablesStrategy)),
                 CommandType.CREATE_TABLE => (ICommandStrategy)_services.GetService(typeof(ICreateTableStrategy)),
@@ -228,7 +264,7 @@ namespace RealEstateRefactored.Infrastructure
                 CommandType.ALTER_TABLE_DELETE_COLUMN => (ICommandStrategy)_services.GetService(typeof(IAlterDeleteColumnStrategy)),
                 CommandType.ALTER_TABLE_ADD_COLUMN => (ICommandStrategy)_services.GetService(typeof(IAlterAddColumnStrategy)),
                 CommandType.UPDATE => (ICommandStrategy)_services.GetService(typeof(IUpdateStrategy)),
-                CommandType.SELECT => (ICommandStrategy)_services.GetService(typeof(ISelectStrategy))
+                CommandType.SELECT => (ICommandStrategy)_services.GetService(typeof(ISelectStrategy)),
             };
         }
     }

@@ -8,17 +8,17 @@ namespace RealEstateRefactored.Services
     /// <inheritdoc/>
     public class TableService : ITableService
     {
-        private readonly IDbContext _dbContext;
+        private readonly IDbContext _context;
 
-        public TableService(IDbContext dbContext)
+        public TableService(IDbContext context)
         {
-            _dbContext = dbContext;
+            _context = context;
         }
 
         /// <inheritdoc/>
         public void RenameTable(string oldTableName, string newTableName)
         {
-            var targetTable = _dbContext.Tables.SingleOrDefault(t => t.Name == oldTableName);
+            var targetTable = _context.Tables.SingleOrDefault(t => t.Name == oldTableName);
             if (targetTable != null)
             {
                 targetTable.Name = newTableName;
@@ -53,16 +53,17 @@ namespace RealEstateRefactored.Services
                 Index = maxColumnIndex
             };
 
-            table.Columns.Add(newColumn);
-
             // Fill all rows with the default column value.
             PopulateRowsWithNewColumn(table, newColumn.Type);
+
+            // Patch existing table.
+            _context.Tables.SingleOrDefault(t => t.Name == tableName).Columns.Add(newColumn);
         }
 
         /// <inheritdoc/>
         public void RenameColumn(string tableName, string oldColumnName, string newColumnName)
         {
-            _dbContext
+            _context
                 .Tables
                 .SingleOrDefault(t => t.Name == tableName)
                 .Columns
@@ -75,7 +76,7 @@ namespace RealEstateRefactored.Services
         {
             var table = GetTable(tableName);
             var column = GetColumn(columnName, table);
-            _dbContext
+            _context
                  .Tables
                  .SingleOrDefault(t => t.Name == tableName)
                  .Columns
@@ -88,49 +89,6 @@ namespace RealEstateRefactored.Services
             var table = GetTable(tableName);
             var maxRowIndex = ++table.MaxRowIndex;
 
-
-        }
-
-        private static void PopulateRowsWithNewColumn(Table targetTable, DataType columnType)
-        {
-            var maxColumnIndex = targetTable.MaxColumnIndex;
-            switch (columnType)
-            {
-                case DataType.Int:
-                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<int>(maxColumnIndex, 0)));
-                    break;
-                case DataType.Text:
-                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<string>(maxColumnIndex, "")));
-                    break;
-                case DataType.Bool:
-                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<bool>(maxColumnIndex, false)));
-                    break;
-                case DataType.Double:
-                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<double>(maxColumnIndex, 0)));
-                    break;
-                case DataType.Decimal:
-                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<decimal>(maxColumnIndex, 0)));
-                    break;
-            };
-        }
-
-        private Column GetColumn(int index, Table table)
-        {
-            return table.Columns.SingleOrDefault(c => c.Index == index);
-        }
-
-        private Column GetColumn(string columnName, Table table)
-        {
-            return table.Columns.SingleOrDefault(c => c.Name == columnName);
-        }
-
-        private Table GetTable(string tableName)
-        {
-            return _dbContext.Tables.SingleOrDefault(t => t.Name == tableName);
-        }
-
-        private void SaveChanges(Table table)
-        {
 
         }
 
@@ -182,6 +140,71 @@ namespace RealEstateRefactored.Services
         public void ClearAllRows()
         {
             throw new NotImplementedException();
+        }
+
+        private static void PopulateRowsWithNewColumn(Table targetTable, DataType columnType)
+        {
+            var maxColumnIndex = targetTable.MaxColumnIndex;
+            switch (columnType)
+            {
+                case DataType.Int:
+                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<int>(maxColumnIndex, 0)));
+                    break;
+                case DataType.Text:
+                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<string>(maxColumnIndex, "")));
+                    break;
+                case DataType.Bool:
+                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<bool>(maxColumnIndex, false)));
+                    break;
+                case DataType.Double:
+                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<double>(maxColumnIndex, 0)));
+                    break;
+                case DataType.Decimal:
+                    targetTable.Rows.ForEach(r => r.Records.Add(new Record<decimal>(maxColumnIndex, 0)));
+                    break;
+            };
+        }
+
+        private Column GetColumn(int index, Table table)
+        {
+            return table.Columns.SingleOrDefault(c => c.Index == index);
+        }
+
+        private Column GetColumn(string columnName, Table table)
+        {
+            return table.Columns.SingleOrDefault(c => c.Name == columnName);
+        }
+
+        private Table GetTable(string tableName)
+        {
+            return _context.Tables.SingleOrDefault(t => t.Name == tableName);
+        }
+
+        public void CreateTable(string tableName, List<string> columnNames, List<string> columnTypes)
+        {
+            // Create default table values.
+            var columns = new List<Column>();
+            var rows = new List<Row>();
+            int maxColumnIndex = -1;
+            int maxRowIndex = -1;
+
+
+            var newTable = new Table
+            {
+                Name = tableName,
+                Columns = columns,
+                Rows = rows,
+                MaxColumnIndex = maxColumnIndex,
+                MaxRowIndex = maxRowIndex
+            };
+
+            // Notify the context about the new table.
+            _context.Tables.Add(newTable);
+
+            for (int i = 0; i < columnNames.Count; i++)
+            {
+                AddColumn(tableName, columnNames[i], columnTypes[i]);
+            }
         }
     }
 }

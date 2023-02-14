@@ -4,7 +4,7 @@
     public class Row
     {
         public int Index { get; }
-        public List<UniversalRecord> Records { get; set; }
+        public List<UniversalRecord> Records { get; set; } = new List<UniversalRecord>();
         public Row(int index)
         {
             Index = index;

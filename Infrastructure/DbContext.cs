@@ -5,6 +5,6 @@ namespace RealEstateRefactored.Infrastructure
 {
     public class DbContext : IDbContext
     {
-        public List<Table> Tables { get; set; }
+        public List<Table> Tables { get; set; } = new List<Table>();
     }
 }

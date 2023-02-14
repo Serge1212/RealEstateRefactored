@@ -3,6 +3,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RealEstateRefactored.Infrastructure;
 using RealEstateRefactored.Interfaces;
+using RealEstateRefactored.Interfaces.Strategies;
+using RealEstateRefactored.Services;
+using RealEstateRefactored.Services.Strategies;
 
 namespace RealEstateRefactored
 {
@@ -20,6 +23,14 @@ namespace RealEstateRefactored
                     services.AddLogging(config => config.AddConsole());
                     services.AddSingleton<IDbContext, DbContext>();
                     services.AddSingleton<IDbConnection, DbConnection>();
+
+                    //Services
+                    services.AddScoped<ITableService, TableService>();
+
+                    // Strategies.
+                    services.AddScoped<ICommandContext, CommandContext>();
+                    services.AddScoped<IShowTablesStrategy, ShowTablesStrategy>();
+                    services.AddScoped<ICreateTableStrategy, CreateTableStrategy>();
                     services.AddScoped<AppRunner>();
                 });
 
