@@ -10,7 +10,6 @@ namespace RealEstateRefactored.Infrastructure
     /// <inheritdoc/>
     public class CommandContext : ICommandContext
     {
-        private readonly List<Command> _commands;
         private readonly IServiceProvider _services;
 
         public CommandContext(IServiceProvider services)
